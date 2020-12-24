@@ -15,7 +15,11 @@ grid = [
 
 grid = [cell for row in grid for cell in row]
     
+is_possible_calls = 0
+
 def is_possible(grid, index, v):
+    global is_possible_calls
+    is_possible_calls += 1
     row_start = index // 9 * 9
     row_pairs = range(row_start, row_start + 9)
     col_start = index % 9
@@ -31,20 +35,16 @@ def copy(grid):
     return grid[:]
 
 def solve(grid, start=0):
-    # solutions = []
+    solutions = []
     for n in range(start, 9 * 9):
         if not grid[n]:
             for v in range(1, 10):
                 if is_possible(grid, n, v):
                     grid[n] = v
-                    # solutions.extend(solve(grid, n + 1))
-                    if solve(grid, n + 1):
-                        return grid
+                    solutions.extend(solve(grid, n + 1))
                     grid[n] = 0
-            # return solutions
-            return None
-    #return [copy(grid)]
-    return grid
+            return solutions
+    return [copy(grid)]
 
 def print_grid(grid):
 
@@ -58,7 +58,11 @@ def print_grid(grid):
 print("before")
 print_grid(grid)
 
-solve(grid)
+solutions = solve(grid)
 
 print("after")
-print_grid(grid)
+for s in solutions:
+    print_grid(s)
+
+print(f"is_possible_calls: {is_possible_calls}")
+
