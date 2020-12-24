@@ -16,6 +16,8 @@ grid = [
 grid = [cell for row in grid for cell in row]
 
 def compute_cells_seen(index):
+    if grid[index]:
+        return None
     row_start = index // 9 * 9
     row_cells = range(row_start, row_start + 9)
     col_start = index % 9
@@ -25,8 +27,10 @@ def compute_cells_seen(index):
     box_cells_2 = range(corner + 9, corner + 12)
     box_cells_3 = range(corner + 18, corner + 21)
     cells = it.chain(row_cells, col_cells, box_cells_1, box_cells_2, box_cells_3)
-    cells = list(set(cells))
-    cells.remove(index)
+
+    # Optimization relies on iteration order
+    cells = [cell for cell in set(cells) if cell < index or (cell > index and grid[cell])]
+
     return cells
 
 cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
