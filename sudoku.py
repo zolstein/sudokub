@@ -15,8 +15,6 @@ grid = [
 
 grid = [cell for row in grid for cell in row]
 
-is_possible_calls = 0
-
 def compute_cells_seen(index):
     row_start = index // 9 * 9
     row_cells = range(row_start, row_start + 9)
@@ -31,11 +29,12 @@ def compute_cells_seen(index):
 
 cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
 
-def is_possible(grid, index, v):
-    global is_possible_calls
-    is_possible_calls += 1
+get_conflicts_calls = 0
+def get_conflicts(grid, index):
+    global get_conflicts_calls
+    get_conflicts_calls += 1
     cells = cells_seen[index]
-    return not any(grid[n] == v for n in cells)
+    return set(grid[n] for n in cells)
 
 def copy(grid):
     return grid[:]
@@ -44,8 +43,9 @@ def solve(grid, start=0):
     solutions = []
     for n in range(start, 9 * 9):
         if not grid[n]:
+            conflicts = get_conflicts(grid, n)
             for v in range(1, 10):
-                if is_possible(grid, n, v):
+                if not v in conflicts:
                     grid[n] = v
                     solutions.extend(solve(grid, n + 1))
                     grid[n] = 0
@@ -71,4 +71,5 @@ for s in solutions:
     print_grid(s)
 
 print(f"is_possible_calls: {is_possible_calls}")
+print(f"get_conflicts: {get_conflicts_calls}")
 
