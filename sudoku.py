@@ -14,22 +14,28 @@ grid = [
 ]
 
 grid = [cell for row in grid for cell in row]
-    
+
 is_possible_calls = 0
+
+def compute_cells_seen(index):
+    row_start = index // 9 * 9
+    row_cells = range(row_start, row_start + 9)
+    col_start = index % 9
+    col_cells = range(col_start, col_start + 81, 9)
+    corner = index // 27 * 27 + (index % 9) // 3 * 3
+    box_cells_1 = range(corner, corner + 3)
+    box_cells_2 = range(corner + 9, corner + 12)
+    box_cells_3 = range(corner + 18, corner + 21)
+    cells = it.chain(row_cells, col_cells, box_cells_1, box_cells_2, box_cells_3)
+    return list(set(cells))
+
+cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
 
 def is_possible(grid, index, v):
     global is_possible_calls
     is_possible_calls += 1
-    row_start = index // 9 * 9
-    row_pairs = range(row_start, row_start + 9)
-    col_start = index % 9
-    col_pairs = range(col_start, col_start + 81, 9)
-    corner = index // 27 * 27 + (index % 9) // 3 * 3
-    box_pairs_1 = range(corner, corner + 3)
-    box_pairs_2 = range(corner + 9, corner + 12)
-    box_pairs_3 = range(corner + 18, corner + 21)
-    pairs = it.chain(row_pairs, col_pairs, box_pairs_1, box_pairs_2, box_pairs_3)
-    return not any(grid[n] == v for n in pairs)
+    cells = cells_seen[index]
+    return not any(grid[n] == v for n in cells)
 
 def copy(grid):
     return grid[:]
