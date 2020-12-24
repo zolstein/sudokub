@@ -70,6 +70,5 @@ print("after")
 for s in solutions:
     print_grid(s)
 
-print(f"is_possible_calls: {is_possible_calls}")
 print(f"get_conflicts: {get_conflicts_calls}")
 
