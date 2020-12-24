@@ -25,7 +25,9 @@ def compute_cells_seen(index):
     box_cells_2 = range(corner + 9, corner + 12)
     box_cells_3 = range(corner + 18, corner + 21)
     cells = it.chain(row_cells, col_cells, box_cells_1, box_cells_2, box_cells_3)
-    return list(set(cells))
+    cells = list(set(cells))
+    cells.remove(index)
+    return cells
 
 cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
 
