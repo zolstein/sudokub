@@ -52,7 +52,8 @@ def compute_cells_seen(index):
     return (row_viz[row], col_viz[col], box_viz[box])
 
 compute_visibility()
-cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
+cells_seen = [compute_cells_seen(i) for i in range(81)]
+one_to_nine = intbitset(range(1, 10))
 
 def copy(grid):
     return grid[:]
@@ -68,20 +69,19 @@ def solve(grid, start=0):
             get_conflicts_calls += 1
             row, col, box = cells_seen[n]
             conflicts = row | col | box
-            for v in range(1, 10):
-                if v not in conflicts:
-                    # Try v in position n
-                    grid[n] = v
-                    row.add(v)
-                    col.add(v)
-                    box.add(v)
-                    # Recursive call
-                    solve(grid, n + 1)
-                    # Remove v and continue
-                    grid[n] = 0
-                    row.remove(v)
-                    col.remove(v)
-                    box.remove(v)
+            for v in one_to_nine - conflicts:
+                # Try v in position n
+                grid[n] = v
+                row.add(v)
+                col.add(v)
+                box.add(v)
+                # Recursive call
+                solve(grid, n + 1)
+                # Remove v and continue
+                grid[n] = 0
+                row.remove(v)
+                col.remove(v)
+                box.remove(v)
             return
     return solutions.append(copy(grid))
 
