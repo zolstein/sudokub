@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import itertools as it
 
 from intbitset import intbitset
@@ -17,51 +17,73 @@ grid = [
 
 grid = [cell for row in grid for cell in row]
 
+row_viz = [intbitset() for _ in range(9)]
+col_viz = [intbitset() for _ in range(9)]
+box_viz = [intbitset() for _ in range(9)]
+
+def compute_visibility():
+    for i in range(9):
+        row_start = i * 9
+        row_cells = range(row_start, row_start + 9)
+        for cell in row_cells:
+            row_viz[i].add(grid[cell])
+
+        col_start = i
+        col_cells = range(col_start, col_start + 81, 9)
+        for cell in col_cells:
+            col_viz[i].add(grid[cell])
+
+        corner = i // 3 * 27 + i % 3 * 3
+        box_cells_1 = range(corner, corner + 3)
+        box_cells_2 = range(corner + 9, corner + 12)
+        box_cells_3 = range(corner + 18, corner + 21)
+        box_cells = it.chain(box_cells_1, box_cells_2, box_cells_3)
+        for cell in box_cells:
+            box_viz[i].add(grid[cell])
+
 def compute_cells_seen(index):
     if grid[index]:
         return None
-    row_start = index // 9 * 9
-    row_cells = range(row_start, row_start + 9)
-    col_start = index % 9
-    col_cells = range(col_start, col_start + 81, 9)
-    corner = index // 27 * 27 + (index % 9) // 3 * 3
-    box_cells_1 = range(corner, corner + 3)
-    box_cells_2 = range(corner + 9, corner + 12)
-    box_cells_3 = range(corner + 18, corner + 21)
-    cells = it.chain(row_cells, col_cells, box_cells_1, box_cells_2, box_cells_3)
 
-    # Optimization relies on iteration order
-    cells = [cell for cell in set(cells) if cell < index or (cell > index and grid[cell])]
+    row = index // 9
+    col = index % 9
+    box = index // 27 * 3 + index % 9 // 3
 
-    return cells
+    return (row_viz[row], col_viz[col], box_viz[box])
 
+compute_visibility()
 cells_seen = [compute_cells_seen(i) for i in range(len(grid))]
-
-get_conflicts_calls = 0
-def get_conflicts(grid, index):
-    global get_conflicts_calls
-    get_conflicts_calls += 1
-    cells = cells_seen[index]
-    iset = intbitset()
-    for n in cells:
-        iset.add(grid[n])
-    return iset
 
 def copy(grid):
     return grid[:]
 
+get_conflicts_calls = 0
+
+solutions = []
+
 def solve(grid, start=0):
-    solutions = []
-    for n in range(start, 9 * 9):
+    global get_conflicts_calls
+    for n in range(start, 81):
         if not grid[n]:
-            conflicts = get_conflicts(grid, n)
+            get_conflicts_calls += 1
+            row, col, box = cells_seen[n]
+            conflicts = row | col | box
             for v in range(1, 10):
-                if not v in conflicts:
+                if v not in conflicts:
+                    # Try v in position n
                     grid[n] = v
-                    solutions.extend(solve(grid, n + 1))
+                    row.add(v)
+                    col.add(v)
+                    box.add(v)
+                    # Recursive call
+                    solve(grid, n + 1)
+                    # Remove v and continue
                     grid[n] = 0
-            return solutions
-    return [copy(grid)]
+                    row.remove(v)
+                    col.remove(v)
+                    box.remove(v)
+            return
+    return solutions.append(copy(grid))
 
 def print_grid(grid):
 
@@ -75,7 +97,7 @@ def print_grid(grid):
 print("before")
 print_grid(grid)
 
-solutions = solve(grid)
+solve(grid)
 
 print("after")
 for s in solutions:
