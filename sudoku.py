@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import itertools as it
 
+from intbitset import intbitset
+
 grid = [
  [0, 0, 3, 0, 0, 0, 0, 9, 0],
  [0, 0, 0, 0, 0, 9, 5, 0, 0],
@@ -40,7 +42,10 @@ def get_conflicts(grid, index):
     global get_conflicts_calls
     get_conflicts_calls += 1
     cells = cells_seen[index]
-    return set(grid[n] for n in cells)
+    iset = intbitset()
+    for n in cells:
+        iset.add(grid[n])
+    return iset
 
 def copy(grid):
     return grid[:]
